@@ -8,6 +8,9 @@ extern motor frontLeft;
 extern motor frontRight;
 extern motor backLeft;
 extern motor backRight;
+extern motor Intake;
+extern motor Flywheel;
+extern motor Pusher;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
