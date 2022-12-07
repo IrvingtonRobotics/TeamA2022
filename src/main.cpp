@@ -45,6 +45,8 @@ double normalize(double val){
 
 int main(void) {
   Pusher.setPosition(0, degrees);
+  Pusher.setVelocity(100, velocityUnits::pct);
+
   while(true) {
     //Get the raw sums of the X and Y joystick axes
     double front_left  = (double)(Controller1.Axis1.position(pct) + Controller1.Axis2.position(pct));
@@ -116,7 +118,7 @@ int main(void) {
     }
 
     if(Controller1.ButtonY.pressing()) {
-      Pusher.spinToPosition(90, degrees);
+      Pusher.spinToPosition(180, degrees);
     } else {
       Pusher.spinToPosition(0, degrees);
     }
