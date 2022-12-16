@@ -35,6 +35,12 @@
 #include <cmath>
 using namespace vex;
 
+/*
+  Normalizes a value to smoothen acceleration of motor speed
+
+  @param val motor power
+  @return normalized value
+*/
 double normalize(double val){
   double x = std::pow(val, 2) / 100;
   if(val < 0) {
@@ -43,25 +49,31 @@ double normalize(double val){
   return x;
 }
 
+void autonomus(void) {
+  
+}
+
 int main(void) {
+  // Initialize pusher position
   Pusher.setPosition(0, degrees);
   Pusher.setVelocity(100, velocityUnits::pct);
 
+  // Driver control loop
   while(true) {
-    //Get the raw sums of the X and Y joystick axes
+    // Get the raw sums of the X and Y joystick axes
     double front_left  = (double)(Controller1.Axis1.position(pct) + Controller1.Axis2.position(pct));
     double back_left   = (double)(Controller1.Axis1.position(pct) - Controller1.Axis2.position(pct));
     double front_right = (double)(Controller1.Axis1.position(pct) - Controller1.Axis2.position(pct));
     double back_right  = (double)(Controller1.Axis1.position(pct) + Controller1.Axis2.position(pct));
     
-    //Find the largest possible sum of X and Y
+    // Find the largest possible sum of X and Y
     double max_raw_sum = (double)(abs(Controller1.Axis1.position(pct)) + abs(Controller1.Axis2.position(pct)));
     
-    //Find the largest joystick value
+    // Find the largest joystick value
     double max_XYstick_value = (double)(std::max(abs(Controller1.Axis1.position(pct)),abs(Controller1.Axis2.position(pct))));
     
-    //The largest sum will be scaled down to the largest joystick value, and the others will be
-    //scaled by the same amount to preserve directionality
+    // The largest sum will be scaled down to the largest joystick value, and the others will be
+    // scaled by the same amount to preserve directionality
     if (max_raw_sum != 0) {
       front_left  = front_left / max_raw_sum * max_XYstick_value;
       back_left   = back_left / max_raw_sum * max_XYstick_value;
@@ -69,8 +81,8 @@ int main(void) {
       back_right  = back_right / max_raw_sum * max_XYstick_value;
     }
 
-    //Now to Controller1sider rotation
-    //Naively add the rotational axis
+    // Robot controller rotation 
+    // Naively add the rotational axis
     front_left  += Controller1.Axis3.position(pct);
     back_left   += Controller1.Axis3.position(pct);
     front_right -= Controller1.Axis3.position(pct);
@@ -81,11 +93,10 @@ int main(void) {
     front_right += Controller1.Axis4.position(pct);
     back_right  -= Controller1.Axis4.position(pct);
 
-    //What is the largest sum, or is 100 larger?
+    // Determine max sum capped 100
     max_raw_sum = std::max(std::abs(front_left),std::max(std::abs(back_left),std::max(std::abs(front_right),std::max(std::abs(back_right),100.0))));
     
     //Scale everything down by the factor that makes the largest only 100, if it was over
-    //front right motor is broken
     double maxpower = 80;
     front_left  = front_left  / max_raw_sum * maxpower;
     back_left   = back_left   / max_raw_sum * maxpower;
