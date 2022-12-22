@@ -28,6 +28,7 @@
 // Intake               motor         9               
 // Flywheel             motor         11              
 // Pusher               motor         8               
+// Flywheel2            motor         2               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
@@ -35,25 +36,36 @@
 #include <cmath>
 using namespace vex;
 
-/*
-  Normalizes a value to smoothen acceleration of motor speed
+void move(double distanceMeters, double angleDegrees = 0, int power = 100) {
+  // positive angleDegrees is right, negative is left
+}
 
-  @param val motor power
-  @return normalized value
-*/
-double normalize(double val){
-  double x = std::pow(val, 2) / 100;
-  if(val < 0) {
-    x *= -1;
+void rotate(double angleDegrees, int power = 100) {
+  // positive angleDegrees is right, negative is left
+  bool spinLeft = angleDegrees > 0;
+  vex::directionType fdir = spinLeft ? fwd : reverse;
+  vex::directionType bdir = spinLeft ? reverse : fwd;
+
+  if (!spinLeft){
+    spinLeft *= -1;
   }
-  return x;
-}
 
-void autonomus(void) {
+  frontLeft.spinFor(fdir, angleDegrees, deg); 
+  frontRight.spinFor(fdir, angleDegrees, deg);
   
+  backLeft.spinFor(bdir, angleDegrees, deg); 
+  backRight.spinFor(bdir, angleDegrees, deg);
 }
 
-int main(void) {
+void autonomous(void) {
+  frontLeft.spinFor(reverse, 90, deg);
+  frontRight.spinFor(reverse, 90, deg); 
+  backLeft.spinFor(fwd, 90, deg);
+  backRight.spinFor(fwd, 90, deg);
+  // rotate(90);
+}
+
+void drivercontrol() {
   // Initialize pusher position
   Pusher.setPosition(0, degrees);
   Pusher.setVelocity(100, velocityUnits::pct);
@@ -61,10 +73,10 @@ int main(void) {
   // Driver control loop
   while(true) {
     // Get the raw sums of the X and Y joystick axes
-    double front_left  = (double)(Controller1.Axis1.position(pct) + Controller1.Axis2.position(pct));
-    double back_left   = (double)(Controller1.Axis1.position(pct) - Controller1.Axis2.position(pct));
-    double front_right = (double)(Controller1.Axis1.position(pct) - Controller1.Axis2.position(pct));
-    double back_right  = (double)(Controller1.Axis1.position(pct) + Controller1.Axis2.position(pct));
+    double front_left  = (double)Controller1.Axis1.position(pct);//  + Controller1.Axis2.position(pct));
+    double back_left   = (double)Controller1.Axis1.position(pct);//  - Controller1.Axis2.position(pct));
+    double front_right = (double)Controller1.Axis1.position(pct);//  - Controller1.Axis2.position(pct));
+    double back_right  = (double)Controller1.Axis1.position(pct);//  + Controller1.Axis2.position(pct));
     
     // Find the largest possible sum of X and Y
     double max_raw_sum = (double)(abs(Controller1.Axis1.position(pct)) + abs(Controller1.Axis2.position(pct)));
@@ -102,11 +114,6 @@ int main(void) {
     back_left   = back_left   / max_raw_sum * maxpower;
     front_right = front_right / max_raw_sum * maxpower;
     back_right  = back_right  / max_raw_sum * maxpower;
-    
-    front_left = normalize(front_left);
-    back_left = normalize(back_left);
-    front_right = normalize(front_right);
-    back_right = normalize(back_right);
 
     //Write the manipulated values out to the motors
     frontLeft.spin(fwd,front_left, velocityUnits::pct);
@@ -124,8 +131,10 @@ int main(void) {
 
     if(Controller1.ButtonR1.pressing()){
       Flywheel.spin(reverse, 100, velocityUnits::pct);
+      Flywheel2.spin(reverse, 100, velocityUnits::pct);
     } else{
       Flywheel.stop();
+      Flywheel2.stop();
     }
 
     if(Controller1.ButtonY.pressing()) {
@@ -134,4 +143,10 @@ int main(void) {
       Pusher.spinToPosition(0, degrees);
     }
   }
+}
+
+competition Competition;
+int main(void){
+  Competition.autonomous(autonomous);
+  Competition.drivercontrol(drivercontrol);
 }
