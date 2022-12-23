@@ -36,47 +36,93 @@
 #include <cmath>
 using namespace vex;
 
-void move(double distanceMeters, double angleDegrees = 0, int power = 100) {
-  // positive angleDegrees is right, negative is left
+void stop(){
+  frontLeft.stop(); 
+  frontRight.stop();
+  backLeft.stop(); 
+  backRight.stop();
 }
 
-void rotate(double angleDegrees, int power = 100) {
-  // positive angleDegrees is right, negative is left
-  bool spinLeft = angleDegrees > 0;
-  vex::directionType fdir = spinLeft ? fwd : reverse;
-  vex::directionType bdir = spinLeft ? reverse : fwd;
+void setPower(double power){
+  frontLeft.setVelocity(power, percent);
+  frontRight.setVelocity(power, percent);
+  backLeft.setVelocity(power, percent);
+  backRight.setVelocity(power, percent);
+}
 
-  if (!spinLeft){
-    spinLeft *= -1;
+void move(std::string dir, double time) {
+  if(dir == "left"){
+    frontLeft.spin(fwd); 
+    frontRight.spin(fwd);
+    backLeft.spin(fwd); 
+    backRight.spin(fwd);
+  } else if(dir == "right"){
+    frontLeft.spin(fwd); 
+    frontRight.spin(fwd);
+    backLeft.spin(reverse); 
+    backRight.spin(reverse);
+  } else if(dir == "forward"){
+    frontLeft.spin(reverse); 
+    frontRight.spin(reverse);
+    backLeft.spin(fwd); 
+    backRight.spin(fwd);
+  } else if(dir == "backward"){
+    frontLeft.spin(reverse); 
+    frontRight.spin(reverse);
+    backLeft.spin(reverse); 
+    backRight.spin(reverse);
   }
 
-  frontLeft.spinFor(fdir, angleDegrees, deg); 
-  frontRight.spinFor(fdir, angleDegrees, deg);
-  
-  backLeft.spinFor(bdir, angleDegrees, deg); 
-  backRight.spinFor(bdir, angleDegrees, deg);
+  vex::task::sleep(time);
+  stop();
+}
+
+void moveDiag(int dir, double time){
+  switch(dir){
+    case 1:
+      backLeft.spin(fwd);
+      frontRight.spin(reverse);
+      break;
+    case 2:
+      frontLeft.spin(fwd);
+      backRight.spin(fwd);
+      break;
+    case 3:
+      backLeft.spin(reverse);
+      frontRight.spin(reverse);
+      break;
+    case 4:
+      frontLeft.spin(reverse);
+      backRight.spin(reverse);
+      break;
+  }
+
+  vex::task::sleep(time);
+  stop();
 }
 
 void autonomous(void) {
-  frontLeft.spinFor(reverse, 90, deg);
-  frontRight.spinFor(reverse, 90, deg); 
-  backLeft.spinFor(fwd, 90, deg);
-  backRight.spinFor(fwd, 90, deg);
-  // rotate(90);
+  // move("left", 2000); // this rotates clockwise 90 degrees
+  // move("right", 2000); // WORKING
+  // move("forward", 2000); this moves left
+  move("backward", 2000); // this rotates counterclockwise 90 degrees
 }
+
+double flywheelPow = 100;
+
 
 void drivercontrol() {
   // Initialize pusher position
   Pusher.setPosition(0, degrees);
   Pusher.setVelocity(100, velocityUnits::pct);
-
+  
   // Driver control loop
   while(true) {
     // Get the raw sums of the X and Y joystick axes
-    double front_left  = (double)Controller1.Axis1.position(pct);//  + Controller1.Axis2.position(pct));
-    double back_left   = (double)Controller1.Axis1.position(pct);//  - Controller1.Axis2.position(pct));
-    double front_right = (double)Controller1.Axis1.position(pct);//  - Controller1.Axis2.position(pct));
-    double back_right  = (double)Controller1.Axis1.position(pct);//  + Controller1.Axis2.position(pct));
+    double front_left  = (double)Controller1.Axis1.position(pct);
+    double back_left   = (double)Controller1.Axis1.position(pct);
+    double front_right = (double)Controller1.Axis1.position(pct);
+    double back_right  = (double)Controller1.Axis1.position(pct);
     
     // Find the largest possible sum of X and Y
     double max_raw_sum = (double)(abs(Controller1.Axis1.position(pct)) + abs(Controller1.Axis2.position(pct)));
@@ -129,9 +175,10 @@ void drivercontrol() {
       Intake.stop();
     }
 
+
     if(Controller1.ButtonR1.pressing()){
-      Flywheel.spin(reverse, 100, velocityUnits::pct);
-      Flywheel2.spin(reverse, 100, velocityUnits::pct);
+      Flywheel.spin(reverse, flywheelPow, velocityUnits::pct);
+      Flywheel2.spin(reverse, flywheelPow, velocityUnits::pct);
     } else{
       Flywheel.stop();
       Flywheel2.stop();
@@ -145,8 +192,26 @@ void drivercontrol() {
   }
 }
 
+vex::brain::lcd screen;
+void printFlywheelPow(){
+  screen.clearScreen();
+  screen.setCursor(0, 0);
+  screen.print(flywheelPow);
+}
+void incrementFlywheelPow(){
+  flywheelPow += 10;
+  printFlywheelPow();
+}
+
+void decrementFlywheelPow(){
+  flywheelPow -= 10;
+  printFlywheelPow();
+}
+
 competition Competition;
 int main(void){
   Competition.autonomous(autonomous);
   Competition.drivercontrol(drivercontrol);
+  Controller1.ButtonUp.pressed(incrementFlywheelPow);
+  Controller1.ButtonDown.pressed(decrementFlywheelPow);
 }
