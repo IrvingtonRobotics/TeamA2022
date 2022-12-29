@@ -25,7 +25,7 @@
 // frontRight           motor         5               
 // backLeft             motor         3               
 // backRight            motor         4               
-// Intake               motor         9               
+// Intake               motor         10              
 // Flywheel             motor         11              
 // Pusher               motor         8               
 // Flywheel2            motor         2               
@@ -51,26 +51,26 @@ void setPower(double power){
 }
 
 void move(std::string dir, double time) {
-  if(dir == "left"){
+  if(dir == "forward"){
     frontLeft.spin(fwd); 
-    frontRight.spin(fwd);
+    frontRight.spin(reverse);
     backLeft.spin(fwd); 
-    backRight.spin(fwd);
-  } else if(dir == "right"){
+    backRight.spin(reverse);
+  } else if(dir == "right"){ // good
     frontLeft.spin(fwd); 
     frontRight.spin(fwd);
     backLeft.spin(reverse); 
     backRight.spin(reverse);
-  } else if(dir == "forward"){
+  } else if(dir == "left"){ // good
     frontLeft.spin(reverse); 
     frontRight.spin(reverse);
     backLeft.spin(fwd); 
     backRight.spin(fwd);
   } else if(dir == "backward"){
     frontLeft.spin(reverse); 
-    frontRight.spin(reverse);
+    frontRight.spin(fwd);
     backLeft.spin(reverse); 
-    backRight.spin(reverse);
+    backRight.spin(fwd);
   }
 
   vex::task::sleep(time);
@@ -78,6 +78,11 @@ void move(std::string dir, double time) {
 }
 
 void moveDiag(int dir, double time){
+  /*
+      1     2
+    
+      4     3
+  */
   switch(dir){
     case 1:
       backLeft.spin(fwd);
@@ -101,11 +106,38 @@ void moveDiag(int dir, double time){
   stop();
 }
 
+void spin(int dir, double time){
+  // time=20 is 90 degrees
+  if(dir == -1){
+    frontLeft.spin(reverse); 
+    frontRight.spin(reverse);
+    backLeft.spin(reverse); 
+    backRight.spin(reverse);
+  }
+  if(dir == 1){
+    frontLeft.spin(fwd); 
+    frontRight.spin(fwd);
+    backLeft.spin(fwd); 
+    backRight.spin(fwd);
+  }
+
+  vex::task::sleep(time);
+  stop();
+}
+
 void autonomous(void) {
-  // move("left", 2000); // this rotates clockwise 90 degrees
-  // move("right", 2000); // WORKING
-  // move("forward", 2000); this moves left
-  move("backward", 2000); // this rotates counterclockwise 90 degrees
+  move("forward", 2000); // this rotates counterclockwise 90 degrees
+  move("backward", 2000);
+  move("left", 2000);
+  move("right", 2000);
+
+  moveDiag(1, 2000);
+  moveDiag(2, 2000);
+  moveDiag(3, 2000);
+  moveDiag(4, 2000);
+
+  spin(1, 2000);
+  spin(-1, 2000);
 }
 
 double flywheelPow = 100;
