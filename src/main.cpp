@@ -21,13 +21,13 @@
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
 // Controller1          controller                    
-// frontLeft            motor         1               
-// frontRight           motor         5               
-// backLeft             motor         3               
-// backRight            motor         4               
-// Intake               motor         10              
+// frontLeft            motor         14              
+// frontRight           motor         19              
+// backLeft             motor         20              
+// backRight            motor         17              
+// Intake               motor         16              
 // Flywheel             motor         11              
-// Pusher               motor         8               
+// Pusher               motor         18              
 // Flywheel2            motor         2               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
@@ -35,6 +35,13 @@
 #include <algorithm>
 #include <cmath>
 using namespace vex;
+
+double flywheelPow = 100;
+// vex::brain::lcd screen;
+std::string forw = "forward";
+std::string back = "backward";
+std::string left = "left";
+std::string rigt = "right";
 
 void stop(){
   frontLeft.stop(); 
@@ -90,15 +97,15 @@ void moveDiag(int dir, double time){
       break;
     case 2:
       frontLeft.spin(fwd);
-      backRight.spin(fwd);
+      backRight.spin(reverse);
       break;
     case 3:
       backLeft.spin(reverse);
-      frontRight.spin(reverse);
+      frontRight.spin(fwd);
       break;
     case 4:
       frontLeft.spin(reverse);
-      backRight.spin(reverse);
+      backRight.spin(fwd);
       break;
   }
 
@@ -125,23 +132,45 @@ void spin(int dir, double time){
   stop();
 }
 
-void autonomous(void) {
-  move("forward", 2000); // this rotates counterclockwise 90 degrees
-  move("backward", 2000);
-  move("left", 2000);
-  move("right", 2000);
-
-  moveDiag(1, 2000);
-  moveDiag(2, 2000);
-  moveDiag(3, 2000);
-  moveDiag(4, 2000);
-
-  spin(1, 2000);
-  spin(-1, 2000);
+void flywheelOn(){
+  Flywheel.spin(reverse, flywheelPow, velocityUnits::pct);
+  Flywheel2.spin(reverse, flywheelPow, velocityUnits::pct);
 }
 
-double flywheelPow = 100;
+void flywheelOff(){
+  Flywheel.stop();
+  Flywheel2.stop();
+}
 
+void intakeOn(){
+  Intake.spin(fwd, 100, velocityUnits::pct);
+}
+
+void intakeOff(){
+  Intake.stop();
+}
+
+void fireLoad(){
+  Pusher.spinToPosition(180, degrees);
+  vex::task::sleep(500);
+  Pusher.spinToPosition(0, degrees);
+}
+
+void autonomous(void) {
+  // intakeOn();
+  // move(forw, 2000);
+  // flywheelOn();
+  // vex::task::sleep(2000);
+  // intakeOff();
+  // fireLoad();
+  // vex::task::sleep(1000);
+  // flywheelOff();
+
+  setPower(10);
+  flywheelOn();
+  vex::task::sleep(2000);
+  fireLoad();
+}
 
 void drivercontrol() {
   // Initialize pusher position
@@ -224,11 +253,10 @@ void drivercontrol() {
   }
 }
 
-vex::brain::lcd screen;
 void printFlywheelPow(){
-  screen.clearScreen();
-  screen.setCursor(0, 0);
-  screen.print(flywheelPow);
+  Controller1.Screen.clearScreen();
+  Controller1.Screen.setCursor(0, 0);
+  Controller1.Screen.print(flywheelPow);
 }
 void incrementFlywheelPow(){
   flywheelPow += 10;
