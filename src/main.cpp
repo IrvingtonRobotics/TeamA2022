@@ -150,10 +150,13 @@ void intakeOff(){
   Intake.stop();
 }
 
-void fireLoad(){
-  Pusher.spinToPosition(180, degrees);
-  vex::task::sleep(500);
-  Pusher.spinToPosition(0, degrees);
+void fireLoad(int times = 1){
+  for(int i=0; i<times; i++){
+    Pusher.spinToPosition(180, degrees);
+    vex::task::sleep(200);
+    Pusher.spinToPosition(0, degrees);
+    vex::task::sleep(500);
+  }
 }
 
 void autonomous(void) {
