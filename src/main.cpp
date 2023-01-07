@@ -43,6 +43,11 @@ std::string back = "backward";
 std::string left = "left";
 std::string rigt = "right";
 
+double wheelRadius = 3.25 / 2;
+// effective wheel radius since they are all at 45 degree angles
+double effWheelRadius = (wheelRadius / sqrt(2));
+double inchesPerDegree = (2 * M_PI * effWheelRadius) / 360;
+
 void stop(){
   frontLeft.stop(); 
   frontRight.stop();
@@ -82,6 +87,34 @@ void move(std::string dir, double time) {
 
   vex::task::sleep(time);
   stop();
+}
+
+void move2(std::string dir, double inches) {
+  // frontRight.setReversed(true);
+  // backRight.setReversed(true);
+  double deg = inches / inchesPerDegree;
+  
+  if(dir == "forward"){
+    frontLeft.startRotateFor(deg, degrees);
+    frontRight.startRotateFor(-deg, degrees);
+    backLeft.startRotateFor(deg, degrees);
+    backRight.startRotateFor(-deg, degrees);
+  } else if(dir == "right"){ // good
+    frontLeft.startRotateFor(deg, degrees)
+    frontRight.startRotateFor(deg, degrees)
+    backLeft.startRotateFor(-deg, degrees);
+    backRight.startRotateFor(-deg, degrees);
+  } else if(dir == "left"){ // good
+    frontLeft.startRotateFor(-deg, degrees);
+    frontRight.startRotateFor(-deg, degrees);
+    backLeft.startRotateFor(deg, degrees)
+    backRight.startRotateFor(deg, degrees)
+  } else if(dir == "backward"){
+    frontLeft.startRotateFor(-deg, degrees);
+    frontRight.startRotateFor(deg, degrees)
+    backLeft.startRotateFor(-deg, degrees);
+    backRight.startRotateFor(deg, degrees)
+  }
 }
 
 void moveDiag(int dir, double time){
@@ -249,9 +282,9 @@ void drivercontrol() {
     }
 
     if(Controller1.ButtonY.pressing()) {
-      Pusher.spinToPosition(180, degrees);
-    } else {
       Pusher.spinToPosition(0, degrees);
+    } else {
+      Pusher.spinToPosition(180, degrees);
     }
   }
 }
@@ -262,12 +295,12 @@ void printFlywheelPow(){
   Controller1.Screen.print(flywheelPow);
 }
 void incrementFlywheelPow(){
-  flywheelPow += 10;
+  flywheelPow += 5;
   printFlywheelPow();
 }
 
 void decrementFlywheelPow(){
-  flywheelPow -= 10;
+  flywheelPow -= 5;
   printFlywheelPow();
 }
 
