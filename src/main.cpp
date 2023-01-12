@@ -40,7 +40,7 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
-/*    Author:       Benjamin Man                                              */
+/*    Author:       Benjamin Man and Abhay Harpalani                          */
 /*    Created:      Sun Aug 14 2022                                           */
 /*    Description:  V5 project                                                */
 /*                                                                            */
@@ -75,18 +75,22 @@
 #include <cmath>
 using namespace vex;
  
-double flywheelPow = 80;
 // vex::brain::lcd screen;
+double flywheelPow = 80;
 std::string forw = "forward";
 std::string back = "backward";
 std::string leff = "left";
 std::string rigt = "right";
  
+/**
 double wheelRadius = 3.25 / 2;
 // effective wheel radius since they are all at 45 degree angles
 double effWheelRadius = (wheelRadius / sqrt(2));
 double inchesPerDegree = (2 * M_PI * effWheelRadius) / 360;
- 
+**/
+
+
+// general purpose functions
 void stop(){
  frontLeft.stop();
  frontRight.stop();
@@ -101,6 +105,14 @@ void setPower(double power){
  backRight.setVelocity(power, percent);
 }
  
+
+void sleepSeconds(double seconds){
+ vex::task::sleep(seconds*1000);
+}
+
+
+
+// auton functions
 void move(std::string dir, double seconds) {
  if(dir == "forward"){
    frontLeft.spin(fwd);
@@ -124,38 +136,12 @@ void move(std::string dir, double seconds) {
    backRight.spin(fwd);
  }
  
- vex::task::sleep(seconds*1000);
+ sleepSeconds(seconds*1000);
  stop();
 }
-/**
-void move2(std::string dir, double inches) {
- double deg = inches / inchesPerDegree;
-  if(dir == "forward"){
-   frontLeft.startRotateFor(deg, degrees);
-   frontRight.startRotateFor(-deg, degrees);
-   backLeft.startRotateFor(deg, degrees);
-   backRight.startRotateFor(-deg, degrees);
- } else if(dir == "right"){ // good
-   frontLeft.startRotateFor(deg, degrees);
-   frontRight.startRotateFor(deg, degrees);
-   backLeft.startRotateFor(-deg, degrees);
-   backRight.startRotateFor(-deg, degrees);
- } else if(dir == "left"){ // good
-   frontLeft.startRotateFor(-deg, degrees);
-   frontRight.startRotateFor(-deg, degrees);
-   backLeft.startRotateFor(deg, degrees);
-   backRight.startRotateFor(deg, degrees);
- } else if(dir == "backward"){
-   frontLeft.startRotateFor(-deg, degrees);
-   frontRight.startRotateFor(deg, degrees);
-   backLeft.startRotateFor(-deg, degrees);
-   backRight.startRotateFor(deg, degrees);
- }
-}
-**/
- 
- 
-void moveDiag(int dir, double time){
+
+
+void moveDiag(int dir, double seconds){
  /*
      1     2
   
@@ -180,12 +166,12 @@ void moveDiag(int dir, double time){
      break;
  }
  
- vex::task::sleep(time);
+ sleepSeconds(seconds);
  stop();
 }
  
-void spin(std::string dir, double time){
- // time=20 is 90 degrees
+void spin(std::string dir, double seconds){
+ // seconds = 0.02 is 90 degrees
  if(dir == "left"){
    frontLeft.spin(reverse);
    frontRight.spin(reverse);
@@ -199,7 +185,7 @@ void spin(std::string dir, double time){
    backRight.spin(fwd);
  }
  
- vex::task::sleep(time);
+ sleepSeconds(seconds);
  stop();
 }
  
@@ -225,16 +211,11 @@ void shoot(int times = 1){
  flywheelOn();
  for(int i=0; i<times; i++){
    Pusher.spinToPosition(100, degrees);
-   vex::task::sleep(200);
+   sleepSeconds(0.2);
    Pusher.spinToPosition(0, degrees);
-   vex::task::sleep(500);
+   sleepSeconds(0.5);
  }
  flywheelOff();
-}
- 
- 
-void sleepSeconds(double seconds){
- vex::task::sleep(seconds*1000);
 }
  
  
@@ -250,39 +231,41 @@ void autonomous(void) {
   setPower(30);
 
   intakeOn();
-  moveDiag(2, 1000);
-  move(forw, 3000);
-  spin(leff, 2000); // should be 90 degrees
-  moveDiag(1, 1000);
-  move(forw, 5000); // move till at north edge
+  moveDiag(2, 1);
+  move(forw, 3);
+  spin(leff, 2); // should be 90 degrees
+  moveDiag(1, 1);
+  move(forw, 5); // move till at north edge
   intakeOff();
 
   // rollers here (intake is stil on)
   sleepSeconds(1);
-  move(back, 1000);
-  spin(rigt, 2000); // should be 90 degrees
-  move(forw, 2500);
+  move(back, 1);
+  spin(rigt, 2); // should be 90 degrees
+  move(forw, 2.5);
   flywheelOn();
   sleepSeconds(0.5);
   shoot(5); // fire number of discs
 
-  spin(rigt, 2000); // should be 90 degrees
+  spin(rigt, 2); // should be 90 degrees
   intakeOn();
-  move(forw, 2000);
-  spin(leff, 1500); // 135 degrees
+  move(forw, 2);
+  spin(leff, 1.5); // 135 degrees
   flywheelOn();
   sleepSeconds(0.5);
   shoot(3);
 
-  spin(rigt, 1500);
-  move(forw, 5000);
+  spin(rigt, 1.5);
+  move(forw, 5);
 }
- 
+
+
+
 void drivercontrol() {
  // Initialize pusher position
  Pusher.setPosition(0, degrees);
  Pusher.setVelocity(100, velocityUnits::pct);
-  // Driver control loop
+ // Driver control loop
  while(true) {
    // Get the raw sums of the X and Y joystick axes
    double front_left  = (double)Controller1.Axis1.position(pct);
@@ -357,7 +340,8 @@ void drivercontrol() {
    }
  }
 }
- 
+
+
 void printFlywheelPow(){
  Controller1.Screen.clearScreen();
  Controller1.Screen.setCursor(0, 0);
