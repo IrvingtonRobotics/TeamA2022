@@ -136,7 +136,7 @@ void move(std::string dir, double seconds) {
    backRight.spin(fwd);
  }
  
- sleepSeconds(seconds*1000);
+ sleepSeconds(seconds);
  stop();
 }
 
@@ -232,7 +232,8 @@ void autonomous(void) {
 
   intakeOn();
   moveDiag(2, 1);
-  move(forw, 3);
+  // everything above this works
+  move(forw, 2);
   spin(leff, 2); // should be 90 degrees
   moveDiag(1, 1);
   move(forw, 5); // move till at north edge
