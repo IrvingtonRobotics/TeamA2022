@@ -33,6 +33,19 @@
 // backLeft             motor         20              
 // backRight            motor         17              
 // Intake               motor         16              
+// Flywheel             motor         5               
+// Pusher               motor         18              
+// Flywheel2            motor         4               
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// frontLeft            motor         14              
+// frontRight           motor         19              
+// backLeft             motor         20              
+// backRight            motor         17              
+// Intake               motor         16              
 // Flywheel             motor         11              
 // Pusher               motor         18              
 // Flywheel2            motor         4               
@@ -170,7 +183,7 @@ void moveDiag(int dir, double seconds){
  stop();
 }
  
-void spin(std::string dir, double seconds){
+void rotate(std::string dir, double seconds){
  // seconds = 0.02 is 90 degrees
  if(dir == "left"){
    frontLeft.spin(reverse);
@@ -207,10 +220,11 @@ void intakeOff(){
  Intake.stop();
 }
  
-void shoot(int times = 1){
+void shoot(double waitSeconds, int times = 1){
  flywheelOn();
+ sleepSeconds(waitSeconds);
  for(int i=0; i<times; i++){
-   Pusher.spinToPosition(100, degrees);
+   Pusher.spinToPosition(120, degrees);
    sleepSeconds(0.2);
    Pusher.spinToPosition(0, degrees);
    sleepSeconds(0.5);
@@ -228,36 +242,47 @@ void shoot(int times = 1){
  
  
 void autonomous(void) {
-  setPower(30);
+  // double deg90 = 0.91 * 1.5;
+
+  
+  flywheelPow = 50;
+  // 4 second wait before shooting, shoot 2 times
+  shoot(2.0, 2);
+  flywheelPow = 80;
+
+  /*
+  rotate(leff, 0.455);
+  sleepSeconds(4);
+  rotate(rigt, 0.455);
+  sleepSeconds(3);
 
   intakeOn();
-  moveDiag(2, 1);
+  moveDiag(2, 0.4);
   // everything above this works
-  move(forw, 2);
-  spin(leff, 2); // should be 90 degrees
-  moveDiag(1, 1);
-  move(forw, 5); // move till at north edge
+  move(forw, 0.4);
+  rotate(leff, 0.3); // 315 degrees
+  moveDiag(1, 0.2);
+  move(forw, 1); // move till at north edge
   intakeOff();
 
   // rollers here (intake is stil on)
   sleepSeconds(1);
-  move(back, 1);
-  spin(rigt, 2); // should be 90 degrees
-  move(forw, 2.5);
+  move(back, 0.2);
+  rotate(rigt, 0.3); // should be 90 degrees
+  move(forw, 0.5);
   flywheelOn();
   sleepSeconds(0.5);
-  shoot(5); // fire number of discs
-
-  spin(rigt, 2); // should be 90 degrees
+  
+  rotate(rigt, 2); // should be 90 degrees
   intakeOn();
-  move(forw, 2);
-  spin(leff, 1.5); // 135 degrees
+  move(forw, 0.4);
+  rotate(leff, 0.3); // 135 degrees
   flywheelOn();
   sleepSeconds(0.5);
-  shoot(3);
-
-  spin(rigt, 1.5);
+  
+  rotate(rigt, 0.3);
   move(forw, 5);
+  */
 }
 
 
