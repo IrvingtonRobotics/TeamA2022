@@ -10,6 +10,34 @@
 // Flywheel             motor         5               
 // Pusher               motor         18              
 // Flywheel2            motor         4               
+// Expansion            motor         11              
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// frontLeft            motor         14              
+// frontRight           motor         19              
+// backLeft             motor         20              
+// backRight            motor         17              
+// Intake               motor         16              
+// Flywheel             motor         5               
+// Pusher               motor         18              
+// Flywheel2            motor         4               
+// Expansion            motor         15              
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// frontLeft            motor         14              
+// frontRight           motor         19              
+// backLeft             motor         20              
+// backRight            motor         17              
+// Intake               motor         16              
+// Flywheel             motor         5               
+// Pusher               motor         18              
+// Flywheel2            motor         4               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
@@ -89,7 +117,7 @@
 using namespace vex;
  
 // vex::brain::lcd screen;
-double flywheelPow = 80;
+double flywheelPow = 75;
 std::string forw = "forward";
 std::string back = "backward";
 std::string leff = "left";
@@ -220,11 +248,11 @@ void intakeOff(){
  Intake.stop();
 }
  
-void shoot(double waitSeconds, int times = 1){
+void shoot(int times = 1){
  flywheelOn();
- sleepSeconds(waitSeconds);
+ sleepSeconds(1);
  for(int i=0; i<times; i++){
-   Pusher.spinToPosition(120, degrees);
+   Pusher.spinToPosition(100, degrees);
    sleepSeconds(0.2);
    Pusher.spinToPosition(0, degrees);
    sleepSeconds(0.5);
@@ -232,57 +260,31 @@ void shoot(double waitSeconds, int times = 1){
  flywheelOff();
 }
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
 void autonomous(void) {
-  // double deg90 = 0.91 * 1.5;
-
+  double deg90 = 0.4;
+  setPower(80);
   
   flywheelPow = 50;
-  // 4 second wait before shooting, shoot 2 times
-  shoot(2.0, 2);
-  flywheelPow = 80;
+  shoot(2);
 
-  /*
-  rotate(leff, 0.455);
-  sleepSeconds(4);
-  rotate(rigt, 0.455);
-  sleepSeconds(3);
-
+  rotate(rigt, deg90);
   intakeOn();
-  moveDiag(2, 0.4);
-  // everything above this works
-  move(forw, 0.4);
-  rotate(leff, 0.3); // 315 degrees
-  moveDiag(1, 0.2);
-  move(forw, 1); // move till at north edge
+  move(forw, 0.5);
+  sleepSeconds(1);
+
+  rotate(leff, deg90 * 1.5);
+  shoot(3);
+
+  rotate(rigt, deg90 / 2);
+  intakeOn();
+  move(forw, 0.5);
+  sleepSeconds(1);
   intakeOff();
 
-  // rollers here (intake is stil on)
-  sleepSeconds(1);
-  move(back, 0.2);
-  rotate(rigt, 0.3); // should be 90 degrees
-  move(forw, 0.5);
-  flywheelOn();
-  sleepSeconds(0.5);
-  
-  rotate(rigt, 2); // should be 90 degrees
-  intakeOn();
-  move(forw, 0.4);
-  rotate(leff, 0.3); // 135 degrees
-  flywheelOn();
-  sleepSeconds(0.5);
-  
-  rotate(rigt, 0.3);
-  move(forw, 5);
-  */
+  rotate(leff, deg90);
+  shoot(3);
+
+  flywheelPow = 75;
 }
 
 
@@ -363,6 +365,14 @@ void drivercontrol() {
      Pusher.spinToPosition(120, degrees);
    } else {
      Pusher.spinToPosition(0, degrees);
+   }
+
+   if(Controller1.ButtonX.pressing()) {
+     Expansion.spin(reverse, 100, pct);
+   } else if(Controller1.ButtonB.pressing()) {
+     Expansion.spin(forward, 100, pct);
+   } else {
+     Expansion.stop();
    }
  }
 }
