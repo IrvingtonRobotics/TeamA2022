@@ -262,6 +262,7 @@ void shoot(int times = 1){
  
 void autonomous(void) {
   double deg90 = 0.4;
+  double 
   setPower(80);
   
   flywheelPow = 50;
@@ -367,12 +368,12 @@ void drivercontrol() {
      Pusher.spinToPosition(0, degrees);
    }
 
+    Expansion.setPosition(0, degrees);
+
    if(Controller1.ButtonX.pressing()) {
-     Expansion.spin(reverse, 100, pct);
-   } else if(Controller1.ButtonB.pressing()) {
-     Expansion.spin(forward, 100, pct);
+     Expansion.setPosition(90, degrees);
    } else {
-     Expansion.stop();
+     Expansion.setPosition(0, degrees);
    }
  }
 }
