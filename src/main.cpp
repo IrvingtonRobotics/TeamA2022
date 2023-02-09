@@ -249,10 +249,11 @@ void intakeOff(){
 }
  
 void shoot(int times = 1){
+  Pusher.setVelocity(100, percent);
  flywheelOn();
  sleepSeconds(1);
  for(int i=0; i<times; i++){
-   Pusher.spinToPosition(100, degrees);
+   Pusher.spinToPosition(120, degrees);
    sleepSeconds(0.2);
    Pusher.spinToPosition(0, degrees);
    sleepSeconds(0.5);
@@ -261,8 +262,8 @@ void shoot(int times = 1){
 }
  
 void autonomous(void) {
-  double deg90 = 0.4;
-  double 
+  double deg90 = 0.55;
+  double square1 = 1.1;
   setPower(80);
   
   flywheelPow = 50;
@@ -270,20 +271,16 @@ void autonomous(void) {
 
   rotate(rigt, deg90);
   intakeOn();
-  move(forw, 0.5);
-  sleepSeconds(1);
-
-  rotate(leff, deg90 * 1.5);
-  shoot(3);
-
-  rotate(rigt, deg90 / 2);
-  intakeOn();
-  move(forw, 0.5);
-  sleepSeconds(1);
+  move(forw, square1 + 0.2);
+  sleepSeconds(0.5);
   intakeOff();
 
-  rotate(leff, deg90);
+  rotate(leff, deg90 / 2);
   shoot(3);
+
+  // return;
+
+
 
   flywheelPow = 75;
 }
